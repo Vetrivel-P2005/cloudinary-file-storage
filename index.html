@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cloud File Storage System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 800px;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #667eea;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      margin-top: 10px;
+    }
+
+    .file-list {
+      margin-top: 30px;
+    }
+
+    .file-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .file-info {
+      flex: 1;
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .file-meta {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 14px;
+      width: auto;
+      background: #667eea;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .upload-area {
+      border: 2px dashed #667eea;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      background: #f8f9ff;
+      margin-bottom: 20px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>☁️ Cloud File Storage</h1>
+    <p class="subtitle">Secure File Management System</p>
+
+    <div id="message"></div>
+
+    <!-- Login Section -->
+    <div id="loginSection" class="section active">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Enter username (student1 or teacher1)">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter password (password123)">
+      </div>
+      <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="section">
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-value" id="fileCount">0</div>
+          <div class="stat-label">Total Files</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="userName">-</div>
+          <div class="stat-label">Logged in as</div>
+        </div>
+      </div>
+
+      <div class="upload-area">
+        <h3>📤 Upload File</h3>
+        <p style="margin: 15px 0; color: #666;">Supported: PDF, Images, Documents (Max 10MB)</p>
+        <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.txt,.docx,.doc,.pptx,.xlsx">
+      </div>
+      <button onclick="uploadFile()">Upload to Cloud</button>
+
+      <div class="file-list">
+        <h3>📁 Your Files</h3>
+        <div id="filesList"></div>
+      </div>
+
+      <button class="btn-secondary" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:8080/api'; // Replace with your backend URL if deployed
+    let authToken = null;
+    let currentUser = null;
+
+    function showMessage(text, type) {
+      const msgDiv = document.getElementById('message');
+      msgDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+      setTimeout(() => msgDiv.innerHTML = '', 5000);
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        showMessage('Please enter username and password', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          authToken = data.token;
+          currentUser = data.username;
+          document.getElementById('userName').textContent = currentUser;
+          showSection('dashboardSection');
+          loadFiles();
+          showMessage('Login successful!', 'success');
+        } else {
+          showMessage(data.message, 'error');
+        }
+      } catch (error) {
+        showMessage('Connection error: ' + error.message, 'error');
+      }
+    }
+
+    async function uploadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        showMessage('Please select a file', 'error');
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        showMessage('File size must be less than 10MB', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch(`${API_URL}/upload`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${authToken}` },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage('File uploaded successfully!', 'success');
+          fileInput.value = '';
+          loadFiles();
+        } else {
+          showMessage(data.message, 'error');
+        }
+      } catch (error) {
+        showMessage('Upload error: ' + error.message, 'error');
+      }
+    }
+
+    async function loadFiles() {
+      try {
+        const response = await fetch(`${API_URL}/files`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          document.getElementById('fileCount').textContent = data.count;
+          displayFiles(data.files);
+        }
+      } catch (error) {
+        showMessage('Error loading files: ' + error.message, 'error');
+      }
+    }
+
+    function displayFiles(files) {
+  const filesList = document.getElementById('filesList');
+
+  if (!files.length) {
+    filesList.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">No files uploaded yet</p>';
+    return;
+  }
+
+  filesList.innerHTML = files.map(file => {
+    // Determine icon by resource_type and format
+    let icon = '📁'; // default folder/file icon
+
+    if (file.resource_type === 'image') {
+      icon = '🖼️';
+    } else if (file.resource_type === 'video') {
+      icon = '🎞️';
+    } else if (file.resource_type === 'raw') {
+      // For raw files (docs, txt, pdf, etc)
+      const ext = file.format?.toLowerCase();
+      if (ext === 'pdf') icon = '📄';
+      else if (ext === 'txt') icon = '📝';
+      else if (ext === 'doc' || ext === 'docx') icon = '📃';
+      else if (ext === 'pptx') icon = '📊';
+      else if (ext === 'xlsx') icon = '📈';
+      else icon = '📄';
+    } else {
+      // fallback by format
+      const ext = file.format?.toLowerCase();
+      if (ext === 'pdf') icon = '📄';
+      else if (ext === 'txt') icon = '📝';
+      else if (ext === 'doc' || ext === 'docx') icon = '📃';
+      else if (ext === 'pptx') icon = '📊';
+      else if (ext === 'xlsx') icon = '📈';
+    }
+
+    // Use file.created_at or file.created
+    const createdAt = file.created_at || file.created || '';
+
+    return `
+      <div class="file-item">
+        <div class="file-info">
+          <div class="file-name">${icon} ${file.filename}</div>
+          <div class="file-meta">${formatFileSize(file.size)} • ${formatDate(createdAt)}</div>
+        </div>
+        <div class="file-actions">
+          <button class="btn-small" onclick="window.open('${file.url}', '_blank')">Download</button>
+          <button class="btn-small btn-danger" onclick="deleteFile('${file.public_id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+
+    async function deleteFile(publicId) {
+      if (!confirm('Are you sure you want to delete this file?')) return;
+
+      try {
+        const response = await fetch(`${API_URL}/delete/${publicId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage('File deleted successfully', 'success');
+          loadFiles();
+        } else {
+          showMessage(data.message, 'error');
+        }
+      } catch (error) {
+        showMessage('Delete error: ' + error.message, 'error');
+      }
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleDateString();
+    }
+
+    function logout() {
+      authToken = null;
+      currentUser = null;
+      showSection('loginSection');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      showMessage('Logged out successfully', 'success');
+    }
+  </script>
+</body>
+</html>
